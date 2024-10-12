@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activate your account</title>
+</head>
+<body>
+    <h2>Hello {{ user.username }},</h2>
+    <p>Thank you for registering. Please click the link below to activate your account:</p>
+    <a href="{{ activation_url }}">Activate your account</a>
+    <br>
+    <p>If the link doesn't work, copy and paste this URL into your browser:</p>
+    <p>{{ activation_url }}</p>
+</body>
+</html>
