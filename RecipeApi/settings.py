@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'querycount.middleware.QueryCountMiddleware',
 ]
 
 ROOT_URLCONF = 'RecipeApi.urls'

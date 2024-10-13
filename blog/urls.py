@@ -18,5 +18,7 @@ urlpatterns = [
     path('add-favourite/<str:slug>/', views.AddFavouriteView.as_view(), name='toggle_favourite'),
     path('favourite-list/', views.FavouriteListView.as_view(), name='favourite_list'),
     path('favourite-list/<str:slug>/', views.FavouriteListView.as_view(), name='favourite_list'), # for delete
+    path('filter/', views.CategoryFilterView.as_view(), name='recipe-filter'),
+    path('search/', views.RecipeSearchView.as_view(), name='recipe-search'),
     path('', include(recipe_router.urls)),
 ]
