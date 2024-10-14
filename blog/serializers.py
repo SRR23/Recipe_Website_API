@@ -22,7 +22,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 class AddRecipeSerializer(serializers.ModelSerializer):
     ingredients = HTMLField()
     instructions = HTMLField()
-    category = CategorySerializer()  # Use the full category serializer
+    # category_id = serializers.IntegerField(write_only=True)
+    # category = CategorySerializer()  # Use the full category serializer
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     reviews = ReviewSerializer(many=True, read_only=True, source='recipe_review')
     is_favourited = serializers.SerializerMethodField()
 
@@ -36,6 +38,12 @@ class AddRecipeSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             return Favourite.objects.filter(user=user, recipe=obj).exists()
         return False
+    
+    # def create(self, validated_data):
+    #     category_id = validated_data.pop('category_id')
+    #     category = Category.objects.get(id=category_id)
+    #     recipe = Recipe.objects.create(category=category, **validated_data)
+    #     return recipe
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):

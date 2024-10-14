@@ -47,10 +47,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'tinymce',
     'django_filters',
+    # 'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -147,6 +149,9 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',  # Search backend
     ],
 }
+
+
+# CORS_ALLOW_ALL_ORIGINS = True
 
 
 

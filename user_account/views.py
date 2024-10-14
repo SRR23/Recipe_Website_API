@@ -72,22 +72,48 @@ def activate(request, uidb64, token):
 
 class LoginView(APIView):
     def post(self, request):
-        serializer = LoginSerializer(data = self.request.data)
+        serializer = LoginSerializer(data=request.data)
+        
         if serializer.is_valid():
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
 
-            user = authenticate(username= username, password=password)
+            user = authenticate(username=username, password=password)
             
             if user:
+                # Create or retrieve token for the user
                 token, _ = Token.objects.get_or_create(user=user)
-                # print(token)
-                # print(_)
+
+                # Log in the user
                 login(request, user)
-                return Response({'token' : token.key, 'username' : user.username})
+
+                # Return token and username in the response
+                return Response({'token': token.key, 'username': user.username}, status=status.HTTP_200_OK)
             else:
-                return Response({'error' : "Invalid Credential"})
-        return Response(serializer.errors)
+                # Invalid credentials error
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # If serializer is not valid, return validation errors with a 400 Bad Request status
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class LoginView(APIView):
+#     def post(self, request):
+#         serializer = LoginSerializer(data = self.request.data)
+#         if serializer.is_valid():
+#             username = serializer.validated_data['username']
+#             password = serializer.validated_data['password']
+
+#             user = authenticate(username= username, password=password)
+            
+#             if user:
+#                 token, _ = Token.objects.get_or_create(user=user)
+#                 # print(token)
+#                 # print(_)
+#                 login(request, user)
+#                 return Response({'token' : token.key, 'username' : user.username})
+#             else:
+#                 return Response({'error' : "Invalid Credential"})
+#         return Response(serializer.errors)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
