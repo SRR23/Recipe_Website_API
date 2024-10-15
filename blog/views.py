@@ -26,6 +26,11 @@ class HomeView(ListAPIView):
 class CategoryListView(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    
+    
+class SelectCategoryView(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
 # List all recipes with filtering and search functionality
@@ -124,7 +129,9 @@ class UserProfileUpdateView(viewsets.ModelViewSet):
         return CustomUser.objects.filter(id=self.request.user.id)
 
     def perform_update(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save()  # No need to pass user here since the serializer handles it
+
+
 
 
 class CategoryFilterView(ListAPIView):

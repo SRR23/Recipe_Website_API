@@ -3,6 +3,8 @@ from user_account.models import CustomUser
 from rest_framework import serializers
 from .models import Recipe, Category, Review, Favourite
 from tinymce.models import HTMLField
+from django.contrib.auth.hashers import make_password
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,4 +51,14 @@ class AddRecipeSerializer(serializers.ModelSerializer):
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ("username", "first_name", "last_name", "email", "password",)
+        fields = ("id", "username", "first_name", "last_name", "email", "password",)
+        extra_kwargs = {
+            'password': {'write_only': True}  # Ensure password is write-only
+        }
+
+    def update(self, instance, validated_data):
+        # If password is in validated_data, hash it before saving
+        password = validated_data.pop('password', None)
+        if password:
+            instance.password = make_password(password)
+        return super(UserProfileUpdateSerializer, self).update(instance, validated_data)
