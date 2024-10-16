@@ -32,7 +32,7 @@ class AddRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'category', 'image', 'prep_time', 'cook_time', 
+        fields = ['id', 'title', 'slug', 'category', 'image', 'prep_time', 'cook_time', 
                   'servings', 'ingredients', 'instructions', 'created_at', 'updated_at', 'reviews', 'is_favourited']
 
     def get_is_favourited(self, obj):

@@ -28,9 +28,9 @@ class CategoryListView(ListAPIView):
     serializer_class = CategorySerializer
     
     
-class SelectCategoryView(ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+# class SelectCategoryView(ListAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
 
 
 # List all recipes with filtering and search functionality
