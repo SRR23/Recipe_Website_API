@@ -18,7 +18,7 @@ class PaginationView(pagination.PageNumberPagination):
 
 # Home view - Displays the latest 3 recipes with N+1 optimization
 class HomeView(ListAPIView):
-    queryset = Recipe.objects.select_related('category').prefetch_related('recipe_review__user').order_by('-created_at')[:3]
+    queryset = Recipe.objects.select_related('category').prefetch_related('recipe_review__user').order_by('-created_at')[:6]
     serializer_class = AddRecipeSerializer
 
 
