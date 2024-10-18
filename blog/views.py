@@ -11,14 +11,14 @@ from django.db.models import Q
 from rest_framework.filters import SearchFilter
 
 class PaginationView(pagination.PageNumberPagination):
-    page_size = 2
+    page_size = 3
     page_size_query_param = 'page_size'
     max_page_size = 100
 
 
 # Home view - Displays the latest 3 recipes with N+1 optimization
 class HomeView(ListAPIView):
-    queryset = Recipe.objects.select_related('category').prefetch_related('recipe_review__user').order_by('-created_at')[:6]
+    queryset = Recipe.objects.select_related('category').prefetch_related('recipe_review__user').order_by('-created_at')[:12]
     serializer_class = AddRecipeSerializer
 
 

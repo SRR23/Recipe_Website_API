@@ -29,11 +29,13 @@ class AddRecipeSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     reviews = ReviewSerializer(many=True, read_only=True, source='recipe_review')
     is_favourited = serializers.SerializerMethodField()
+    author_name = serializers.CharField(source='author.username', read_only=True)
 
     class Meta:
         model = Recipe
         fields = ['id', 'title', 'slug', 'category', 'image', 'prep_time', 'cook_time', 
-                  'servings', 'ingredients', 'instructions', 'created_at', 'updated_at', 'reviews', 'is_favourited']
+                  'servings', 'ingredients', 'instructions', 'created_at', 'updated_at', 
+                  'reviews', 'is_favourited', 'author_name']
 
     def get_is_favourited(self, obj):
         user = self.context['request'].user
