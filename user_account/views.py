@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse
 from django.urls import reverse
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
 from .models import CustomUser
 from rest_framework import status
@@ -42,13 +42,20 @@ class RegisterView(generics.GenericAPIView):
 
             # Email subject and message
             subject = 'Activate Your Account'
-            message = render_to_string('registration/activation_email.html', {
+
+            # Plain text message
+            text_message = f'Hi {user.username},\nPlease use the link below to activate your account:\n{activation_url}'
+
+            # HTML message
+            html_message = render_to_string('registration/activation_email.html', {
                 'user': user,
                 'activation_url': activation_url
             })
 
-            # Send the email
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+            # Send the email using EmailMultiAlternatives
+            email = EmailMultiAlternatives(subject, text_message, settings.DEFAULT_FROM_EMAIL, [user.email])
+            email.attach_alternative(html_message, "text/html")
+            email.send()
 
             return Response({'message': 'Registration successful. Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
 
