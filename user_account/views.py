@@ -72,7 +72,7 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return redirect('login')  # Redirect to login page after activation
+        return redirect('https://srr23.github.io/Recipe_Website_FrontEnd/login.html')  # Redirect to login page after activation
     else:
         return HttpResponse('Activation link is invalid!')
 
