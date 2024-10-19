@@ -4,6 +4,7 @@ from user_account.models import CustomUser
 from django.utils.text import slugify
 from .slug import generate_unique_slug
 from tinymce.models import HTMLField
+from PIL import Image
 # Create your models here.
 
 class Category(models.Model):
@@ -37,19 +38,39 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return self.title
     
-    
     def save(self, *args, **kwargs):
         # Check if the instance is being updated (already exists in the database)
         updating = self.pk is not None
-        
-        # Update slug based on whether it's a new or existing instance
-        if updating:
-            self.slug = generate_unique_slug(self, self.title, update=True)
-        else:
-            self.slug = generate_unique_slug(self, self.title)
-        
-        # Call the original save method
+
+        # Generate slug if not already provided
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        # Call the original save method to save the object
         super().save(*args, **kwargs)
+
+        # Resize the image after saving it
+        if self.image:
+            img_path = self.image.path
+            img = Image.open(img_path)
+
+            # Resize the image to the specified size (width: 330px, height: 285px)
+            output_size = (330, 285)
+            img = img.resize(output_size)
+            img.save(img_path)
+            
+    # def save(self, *args, **kwargs):
+    #     # Check if the instance is being updated (already exists in the database)
+    #     updating = self.pk is not None
+        
+    #     # Update slug based on whether it's a new or existing instance
+    #     if updating:
+    #         self.slug = generate_unique_slug(self, self.title, update=True)
+    #     else:
+    #         self.slug = generate_unique_slug(self, self.title)
+        
+    #     # Call the original save method
+    #     super().save(*args, **kwargs)
 
 
 class Review(models.Model):
