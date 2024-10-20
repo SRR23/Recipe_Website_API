@@ -42,9 +42,10 @@ class Recipe(models.Model):
         # Check if the instance is being updated (already exists in the database)
         updating = self.pk is not None
 
-        # Generate slug if not already provided
-        if not self.slug:
-            self.slug = slugify(self.title)
+        if updating:
+            self.slug = generate_unique_slug(self, self.title, update=True)
+        else:
+            self.slug = generate_unique_slug(self, self.title)
 
         # Call the original save method to save the object
         super().save(*args, **kwargs)
