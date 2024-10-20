@@ -20,6 +20,91 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import RegisterSerializer, LoginSerializer
 
+import os
+import requests
+from django.conf import settings
+
+def send_mail_via_mailersend(subject, text_message, recipient_email):
+    api_key = settings.MAILERSEND_API_KEY
+    url = "https://api.mailersend.com/v1/email"
+
+    # Prepare the email payload
+    payload = {
+        "from": {
+            "email": "no-reply@trial-pq3enl6mowmg2vwr.mlsender.net",  # Use a verified domain email
+            "name": "Recipe"  # From Name
+        },
+        "to": [
+            {
+                "email": recipient_email,
+                "name": recipient_email  # Name of the recipient
+            }
+        ],
+        "subject": subject,
+        "text": text_message,  # Plain text content
+        # Optionally, you can add "html" for HTML emails
+        # "html": "<p>This is the HTML message content</p>"
+    }
+
+    # Set the headers, including your MailerSend API key
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    # Send the request to MailerSend
+    response = requests.post(url, json=payload, headers=headers)
+
+    # Check if the request was successful
+    if response.status_code == 202:
+        print("Email sent successfully!")
+    else:
+        print(f"Failed to send email. Response: {response.text}")
+
+    return response.status_code
+
+
+# class RegisterView(generics.GenericAPIView):
+#     serializer_class = RegisterSerializer
+
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.save()
+
+#             # Generate activation token and UID
+#             token = default_token_generator.make_token(user)
+#             uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+#             # Get the current domain
+#             current_site = get_current_site(request)
+#             domain = current_site.domain
+
+#             # Create activation link
+#             activation_link = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+#             activation_url = f'http://{domain}{activation_link}'
+
+#             # Email subject and message
+#             subject = 'Activate Your Account'
+
+#             # Plain text message
+#             text_message = f'Hi {user.username},\nPlease use the link below to activate your account:\n{activation_url}'
+
+#             # HTML message
+#             html_message = render_to_string('registration/activation_email.html', {
+#                 'user': user,
+#                 'activation_url': activation_url
+#             })
+
+#             # Send the email using EmailMultiAlternatives
+#             email = EmailMultiAlternatives(subject, text_message, settings.DEFAULT_FROM_EMAIL, [user.email])
+#             email.attach_alternative(html_message, "text/html")
+#             email.send()
+
+#             return Response({'message': 'Registration successful. Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
@@ -40,26 +125,15 @@ class RegisterView(generics.GenericAPIView):
             activation_link = reverse('activate', kwargs={'uidb64': uid, 'token': token})
             activation_url = f'http://{domain}{activation_link}'
 
-            # Email subject and message
+            # Send the activation email via MailerSend
             subject = 'Activate Your Account'
-
-            # Plain text message
             text_message = f'Hi {user.username},\nPlease use the link below to activate your account:\n{activation_url}'
-
-            # HTML message
-            html_message = render_to_string('registration/activation_email.html', {
-                'user': user,
-                'activation_url': activation_url
-            })
-
-            # Send the email using EmailMultiAlternatives
-            email = EmailMultiAlternatives(subject, text_message, settings.DEFAULT_FROM_EMAIL, [user.email])
-            email.attach_alternative(html_message, "text/html")
-            email.send()
+            send_mail_via_mailersend(subject, text_message, user.email)
 
             return Response({'message': 'Registration successful. Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 def activate(request, uidb64, token):
@@ -72,7 +146,7 @@ def activate(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return redirect('login')  # Redirect to login page after activation
+        return redirect('https://srr23.github.io/Recipe_Website_FrontEnd/login.html')  # Redirect to login page after activation
     else:
         return HttpResponse('Activation link is invalid!')
 

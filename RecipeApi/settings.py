@@ -155,13 +155,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = os.getenv("EMAIL")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.mailersend.net'
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = os.getenv("EMAIL")
+# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD")
 # DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_EMAIL")
+MAILERSEND_API_KEY = os.getenv('MAILERSEND_API_KEY')
 
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
