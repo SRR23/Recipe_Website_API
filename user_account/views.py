@@ -20,39 +20,52 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import RegisterSerializer, LoginSerializer
 
-import os
 import requests
 from django.conf import settings
 
-def send_mail_via_mailersend(subject, text_message, recipient_email):
-    api_key = settings.MAILERSEND_API_KEY
-    url = "https://api.mailersend.com/v1/email"
+def send_mail_via_sendgrid(subject, text_message, recipient_email):
+    api_key = settings.SENDGRID_API_KEY
+    url = "https://api.sendgrid.com/v3/mail/send"
 
     # Prepare the email payload
     payload = {
-        "from": {
-            "email": "no-reply@trial-pq3enl6mowmg2vwr.mlsender.net",  # Use a verified domain email
-            "name": "Recipe"  # From Name
-        },
-        "to": [
+        "personalizations": [
             {
-                "email": recipient_email,
-                "name": recipient_email  # Name of the recipient
+                "to": [
+                    {
+                        "email": recipient_email,
+                        "name": recipient_email  # You can use a specific name if available
+                    }
+                ],
+                "subject": subject
             }
         ],
-        "subject": subject,
-        "text": text_message,  # Plain text content
-        # Optionally, you can add "html" for HTML emails
-        # "html": "<p>This is the HTML message content</p>"
+        "from": {
+            "email": "iamremon807@gmail.com",  # Use your verified SendGrid email
+            "name": "Recipe"  # Sender's name
+        },
+        "content": [
+            {
+                "type": "text/plain",
+                "value": text_message  # Plain text content
+            }
+        ]
+        # You can also add HTML content as another content type here if needed
+        # "content": [
+        #     {
+        #         "type": "text/html",
+        #         "value": "<p>This is the HTML message content</p>"
+        #     }
+        # ]
     }
 
-    # Set the headers, including your MailerSend API key
+    # Set the headers, including your SendGrid API key
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
 
-    # Send the request to MailerSend
+    # Send the request to SendGrid
     response = requests.post(url, json=payload, headers=headers)
 
     # Check if the request was successful
@@ -128,7 +141,7 @@ class RegisterView(generics.GenericAPIView):
             # Send the activation email via MailerSend
             subject = 'Activate Your Account'
             text_message = f'Hi {user.username},\nPlease use the link below to activate your account:\n{activation_url}'
-            send_mail_via_mailersend(subject, text_message, user.email)
+            send_mail_via_sendgrid(subject, text_message, user.email)
 
             return Response({'message': 'Registration successful. Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
 
