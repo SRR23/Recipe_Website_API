@@ -36,7 +36,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         account = CustomUser(username = username, email=email, first_name = first_name, last_name = last_name)
         # print(account)
         account.set_password(password)
-        account.is_active = False
+        account.is_active = True
         account.save()
         return account
 

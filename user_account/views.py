@@ -20,55 +20,55 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import RegisterSerializer, LoginSerializer
 
-import requests
-from django.conf import settings
+# import requests
+# from django.conf import settings
 
-def send_mail_via_sendgrid(subject, text_message, recipient_email):
-    api_key = settings.SENDGRID_API_KEY
-    url = "https://api.sendgrid.com/v3/mail/send"
+# def send_mail_via_sendgrid(subject, text_message, recipient_email):
+#     api_key = settings.SENDGRID_API_KEY
+#     url = "https://api.sendgrid.com/v3/mail/send"
 
-    # Prepare the email payload
-    payload = {
-        "personalizations": [
-            {
-                "to": [
-                    {
-                        "email": recipient_email,
-                        "name": recipient_email  # Use the actual recipient's name if available
-                    }
-                ],
-                "subject": subject
-            }
-        ],
-        "from": {
-            "email": "iamremon807@gmail.com",  # Must be verified in SendGrid
-            "name": "Recipe"  # Sender's name
-        },
-        "content": [
-            {
-                "type": "text/plain",
-                "value": text_message  # Plain text content
-            }
-        ]
-    }
+#     # Prepare the email payload
+#     payload = {
+#         "personalizations": [
+#             {
+#                 "to": [
+#                     {
+#                         "email": recipient_email,
+#                         "name": recipient_email  # Use the actual recipient's name if available
+#                     }
+#                 ],
+#                 "subject": subject
+#             }
+#         ],
+#         "from": {
+#             "email": "iamremon807@gmail.com",  # Must be verified in SendGrid
+#             "name": "SRR"  # Sender's name
+#         },
+#         "content": [
+#             {
+#                 "type": "text/plain",
+#                 "value": text_message  # Plain text content
+#             }
+#         ]
+#     }
 
-    # Set the headers, including your SendGrid API key
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+#     # Set the headers, including your SendGrid API key
+#     headers = {
+#         "Authorization": f"Bearer {api_key}",
+#         "Content-Type": "application/json"
+#     }
 
-    # Send the request to SendGrid
-    response = requests.post(url, json=payload, headers=headers)
+#     # Send the request to SendGrid
+#     response = requests.post(url, json=payload, headers=headers)
 
-    # Enhanced error logging
-    if response.status_code == 202:
-        print("Email sent successfully!")
-    else:
-        print(f"Failed to send email. Status code: {response.status_code}")
-        print(f"Response body: {response.text}")  # Provides more details on the error
+#     # Enhanced error logging
+#     if response.status_code == 202:
+#         print("Email sent successfully!")
+#     else:
+#         print(f"Failed to send email. Status code: {response.status_code}")
+#         print(f"Response body: {response.text}")  # Provides more details on the error
 
-    return response.status_code
+#     return response.status_code
 
 
 
@@ -113,6 +113,51 @@ def send_mail_via_sendgrid(subject, text_message, recipient_email):
 
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# class RegisterView(generics.GenericAPIView):
+#     serializer_class = RegisterSerializer
+
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.save()
+
+#             # Generate activation token and UID
+#             token = default_token_generator.make_token(user)
+#             uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+#             # Get the current domain
+#             current_site = get_current_site(request)
+#             domain = current_site.domain
+
+#             # Create activation link
+#             activation_link = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+#             activation_url = f'http://{domain}{activation_link}'
+
+#             # Send the activation email via MailerSend
+#             subject = 'Activate Your Account'
+#             text_message = f'Hi {user.username},\nPlease use the link below to activate your account:\n{activation_url}'
+#             send_mail_via_sendgrid(subject, text_message, user.email)
+
+#             return Response({'message': 'Registration successful. Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# def activate(request, uidb64, token):
+#     try:
+#         uid = force_str(urlsafe_base64_decode(uidb64))
+#         user = CustomUser.objects.get(pk=uid)
+#     except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+#         user = None
+
+#     if user is not None and default_token_generator.check_token(user, token):
+#         user.is_active = True
+#         user.save()
+#         return redirect('https://srr23.github.io/Recipe_Website_FrontEnd/login.html')  # Redirect to login page after activation
+#     else:
+#         return HttpResponse('Activation link is invalid!')
+
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
@@ -120,44 +165,14 @@ class RegisterView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            user.is_active = True  # Set the user as active immediately
+            user.save()  # Save the user to the database
 
-            # Generate activation token and UID
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-            # Get the current domain
-            current_site = get_current_site(request)
-            domain = current_site.domain
-
-            # Create activation link
-            activation_link = reverse('activate', kwargs={'uidb64': uid, 'token': token})
-            activation_url = f'http://{domain}{activation_link}'
-
-            # Send the activation email via MailerSend
-            subject = 'Activate Your Account'
-            text_message = f'Hi {user.username},\nPlease use the link below to activate your account:\n{activation_url}'
-            send_mail_via_sendgrid(subject, text_message, user.email)
-
-            return Response({'message': 'Registration successful. Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Registration successful. Your account is now active.'}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-def activate(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = CustomUser.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
-        user = None
-
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return redirect('https://srr23.github.io/Recipe_Website_FrontEnd/login.html')  # Redirect to login page after activation
-    else:
-        return HttpResponse('Activation link is invalid!')
-
+    
+    
 
 class LoginView(APIView):
     def post(self, request):
