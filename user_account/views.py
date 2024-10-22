@@ -34,14 +34,14 @@ def send_mail_via_sendgrid(subject, text_message, recipient_email):
                 "to": [
                     {
                         "email": recipient_email,
-                        "name": recipient_email  # You can use a specific name if available
+                        "name": recipient_email  # Use the actual recipient's name if available
                     }
                 ],
                 "subject": subject
             }
         ],
         "from": {
-            "email": "iamremon807@gmail.com",  # Use your verified SendGrid email
+            "email": "iamremon807@gmail.com",  # Must be verified in SendGrid
             "name": "Recipe"  # Sender's name
         },
         "content": [
@@ -50,13 +50,6 @@ def send_mail_via_sendgrid(subject, text_message, recipient_email):
                 "value": text_message  # Plain text content
             }
         ]
-        # You can also add HTML content as another content type here if needed
-        # "content": [
-        #     {
-        #         "type": "text/html",
-        #         "value": "<p>This is the HTML message content</p>"
-        #     }
-        # ]
     }
 
     # Set the headers, including your SendGrid API key
@@ -68,13 +61,15 @@ def send_mail_via_sendgrid(subject, text_message, recipient_email):
     # Send the request to SendGrid
     response = requests.post(url, json=payload, headers=headers)
 
-    # Check if the request was successful
+    # Enhanced error logging
     if response.status_code == 202:
         print("Email sent successfully!")
     else:
-        print(f"Failed to send email. Response: {response.text}")
+        print(f"Failed to send email. Status code: {response.status_code}")
+        print(f"Response body: {response.text}")  # Provides more details on the error
 
     return response.status_code
+
 
 
 # class RegisterView(generics.GenericAPIView):
